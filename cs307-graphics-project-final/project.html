@@ -1,0 +1,93 @@
+<!-- 
+Midori Yang and Soobin Yang
+CS307: Computer Graphics
+Final Project Alpha version
+ -->
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Lato|Ubuntu" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <title>Final Project: Ocean Scene</title>
+  </head>
+<body>
+    
+    <div id="header">
+        <div>
+            <h1>CS307 Final Project</h1>
+            <h3>by Midori and Soobin Yang</h3>
+            <p>For our final project, we decided to create an ocean scene based off of the objects we created for a previous assignment: a submarine and manta ray.<br>
+            <a href = "demo.html" target="_blank">You can view the demo here.</a></p>
+        </div>
+    </div>
+    
+    <h3>Submarine</h3>
+    <img src="assets/screenshots/sub1.PNG" alt="front-side view of submarine">
+    <img src="assets/screenshots/sub2.PNG" alt="back view of submarine">
+    <p>The submarine is made of several lathe, extrude, and basic torus geometries, with Lambert material for the submarine body 
+    and Phong materials for the reflective windows and metal elements. The user can alter its position in the scene using the WASD and IK keys.</p>
+    
+    <h3>Manta Ray</h3>
+    <img src="assets/screenshots/manta1.PNG" alt="front-top view of manta ray">
+    <img src="assets/screenshots/manta2.PNG" alt="back-top view of manta ray">
+    <p>The manta rays are made of a few reflected Bezier surfaces for the body and wings, a basic cone geometry for the tail, and Katherine Kjeer's TubeRadialGeometry for the lobes. Lambert material is used 
+    throughout since rays are not particularly shiny. The user can determine how many rays are generated to accomodate for different GPU capabalities. 
+    The rays' position and color are randomly generated throughout the scene given a number of rays and within certain aesthetic ranges. 
+    The HSL colors are restricted to generally be blue-green and the positions are generated so that no ray is placed too close to another.</p>
+    
+    <h3>Scene</h3>
+    <img src="assets/screenshots/scene.PNG" alt="scene with no objects"><br>
+    <figure>
+      <img src="assets/textures/surface_resized.jpg" alt="texture for ocean surface">
+      <figcaption>Texture used for ocean surface</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/textures/underwater_resized.jpg" alt="texture for walls of cube (underwater)">
+      <figcaption>Texture used for four walls (underwater scene)</figcaption>
+    </figure>
+    <figure>
+       <img src="assets/textures/oceansand_resized.jpg" alt="texture for sandy ocean floor">
+      <figcaption>Texture used for ocean floor</figcaption>
+    </figure>
+    <p>The background ocean scene is made using the skybox code from <a href="https://threejs.org/examples/webgl_water.html" target="_blank">the WebGL water demo</a>. 
+    It uses a custom shader to soften the shadows at the edges of the CubeGeometry to create an illusion of continuity. This would also require
+    textures that wrap seamlessly between the faces, but we did our best with the textures we found.</p>
+    
+    <h3>Lighting</h3>
+    <figure>
+      <img src="assets/screenshots/lighting1.PNG" alt="scene with default white lighting">
+      <figcaption>Scene with default white lighting</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/screenshots/lighting2.PNG" alt="scene with altered blue-green lighting">
+      <figcaption>Scene with altered blue-green lighting</figcaption>
+    </figure>
+    <figure>
+       <img src="assets/screenshots/lighting3.PNG" alt="scene with transparent crepuscular ray texture over camera">
+      <figcaption>Scene with transparent crepuscular ray texture over camera</figcaption>
+    </figure>
+    <p>To achieve an underwater effect, we used a blue-green ambientLight and a yellow spotLight shining from above the scene to mimic the sun. We also attached 
+    a semi-transparent water texture to the front of the camera to emphasize the effect of underwater crepuscular rays.</p>
+    
+    <h3>Camera</h3>
+    <p>We restricted the OrbitControls of the camera so that the user wouldn't be able to zoom out of the scene and break the illusion.</p>
+    
+    <h3>Animation</h3>
+    <p>The page listens for key presses from the WASD and IK keys to animate the submarine by changing the direction vector used to calculate its movement. 
+    The A and D keys rotate the submarine to the left and right respectively, and updates the X property based on sin(rotation) and the Z based on cos(rotation). 
+    The submarine is restricted from leaving the scene as the code checks its position.
+    <br>The manta rays are animated to swim forward, 
+    and loop back to the other when they reach a certain point outside of the scene. The rays have slightly different randomly-generated speeds to give some 
+    variety to how the scene looks.</p>
+    
+    <h3>Future Plans</h3>
+    <p>If we'd had more time, we would've liked to animate the manta rays' wings to flap realistically as they move through the "water." 
+    Doing this would involve calculating a function to animate the Bezier surfaces' control points, which would move roughly in the 
+    shape of a sine curve.<br>
+    It also would have been nice to create a more realistic-looking background that hid the fact that the scene was contained in a box, 
+    and add some decoration to the ocean floor.<br>
+    We also wanted to implement Three.js's animated water shader for the surface of the ocean, but instead used a static water texture 
+    due to time constraints.<br>
+    We were also thinking of adding a second camera view from the perspective of the submarine, as if the user was sitting in it.</p>
+  
+</body>
+</html>

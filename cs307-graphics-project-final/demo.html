@@ -1,0 +1,336 @@
+<!-- 
+Midori Yang and Soobin Yang
+CS307: Computer Graphics
+Final Project Alpha version
+ -->
+<html>
+  <head>
+      
+    <link href="style.css" rel="stylesheet">
+    <script src="libs/three.js"></script>
+    <script src="libs/OrbitControls.js"></script>
+    <script src="libs/tw.js"></script>
+    <script src="libs/syang5Submarine.js"></script>
+    <script src="libs/myang5MantaRay.js"></script>
+    <script src="libs/TubeRadialGeometry.js"></script>
+    
+    <title>Final Project: Ocean Scene</title>
+    
+  </head>
+<body>
+    
+<p>
+    Click and drag to dolly the camera view, and use the arrow keys to move the camera.<br><br>
+    To move the submarine, use the WASD keys and IK keys:<br>
+    W, S - forward, backward<br>
+    A, D - rotate left, right<br>
+    I, K - up, down<br>
+</p>
+
+<script>
+
+// Number of manta rays displayed in the scene is user-determined
+// Set up scene after receiving this input
+var promptStr = "How many manta rays should fill the scene?\n(40 is recommended for aesthetics, 10 for slow computers)";
+var validStr = "Please enter a number.\n"
+var rays = prompt(promptStr);
+//If the input is not a valid number, ask again
+while(isNaN(parseInt(rays))){
+    rays = prompt(validStr + promptStr);
+}
+
+var scene = new THREE.Scene();
+var renderer = new THREE.WebGLRenderer();
+var canvasElt = renderer.domElement;
+document.addEventListener( 'keydown', onKeyDown, false );
+document.addEventListener( 'keyup', onKeyUp, false );
+document.body.appendChild(canvasElt);
+renderer.setSize(1000,800);
+renderer.setClearColor( 0xdddddd, 1);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+// We attempted to add shadows, but they don't seem to be appearing. All code related to shadows commented out.
+
+// ====================================================================
+/* ROOM SETUP */
+
+// made room size variable for future position referencing
+var roomDimen = 250;
+
+// code for skybox referenced from https://threejs.org/examples/webgl_water.html
+
+var cubeTextureLoader = new THREE.CubeTextureLoader();
+cubeTextureLoader.setPath('assets/textures/');
+
+var cubeTexture = cubeTextureLoader.load( [
+	'underwater_resized.jpg', 'underwater_resized.jpg',
+	'surface_resized.jpg', 'oceansand_resized.jpg',
+	'underwater_resized.jpg', 'underwater_resized.jpg'
+] );
+
+var cubeShader = THREE.ShaderLib[ 'cube' ];
+cubeShader.uniforms[ 'tCube' ].value = cubeTexture;
+
+var skyBoxMaterial = new THREE.ShaderMaterial( {
+	fragmentShader: cubeShader.fragmentShader,
+	vertexShader: cubeShader.vertexShader,
+	uniforms: cubeShader.uniforms,
+	side: THREE.BackSide
+} );
+
+var skyBox = new THREE.Mesh( new THREE.BoxBufferGeometry( roomDimen, roomDimen, roomDimen ), skyBoxMaterial );
+skyBox.receiveShadow = true;
+scene.add( skyBox );
+
+
+// ====================================================================
+/* OBJECT PROP SETUP */  
+
+// Add submarine to scene
+var sub = syang5Submarine();
+var subScaleFactor = 0.5
+sub.scale.set( subScaleFactor, subScaleFactor, subScaleFactor );
+// sub.castShadow = true;
+// sub.receiveShadow = true;
+scene.add(sub);
+
+// Add manta ray to scene
+
+function pickColor(){ // pick random HSL color within range of values (arbitrary)
+    var h = 250 - Math.floor(Math.random() * (70/10+1)) * 10; // range 180-250 interval of 10
+    var s = 88;
+    var l = 80 - Math.floor(Math.random() * (30/10+1)) * 10; // range 50 - 80 interval of 10
+    color = new THREE.Color("hsl(" + h + "," + s + "%," + l + "%" + ")");
+    return color;
+}
+
+var numRays = Math.floor(parseInt(rays));
+var mantaRays = []
+
+for(var i = 0;i<numRays;i++){
+    var mantaRay = myang5MantaRay(pickColor(),0xffffff);
+    var interval = 10;
+    var mantaScale = 1.3;
+    // pick random xyz position within constraints of the room size
+    // and also make sure they don't overlap by introducing spacing interval
+    var x = roomDimen*0.8/2 - Math.floor(Math.random() * (roomDimen*0.8/interval+1)) * interval;  
+    var y = roomDimen*0.8/2 - Math.floor(Math.random() * (roomDimen*0.8/interval+1)) * interval;  
+    var z = roomDimen*0.8/2 - Math.floor(Math.random() * (roomDimen*0.8/interval+1)) * interval; 
+    mantaRay.position.set(x, y, z);
+    mantaRay.scale.set(mantaScale, mantaScale, mantaScale);
+    // mantaRay.castShadow = true;
+    // mantaRay.receiveShadow = true;
+    mantaRay.speed = 1 + Math.floor(Math.random() * 11) * 0.1; //pick random speed between 1.0-2.0 units per frame interval of 0.1
+    scene.add(mantaRay);
+    mantaRays.push(mantaRay)
+}
+
+
+// ====================================================================
+/* CAMERA SETUP */
+
+var thirdPersonCam = new THREE.PerspectiveCamera( 90,      // fovy in degrees
+                                          1000/800,         // aspect ratio: our canvas is square
+                                          0.5,          // near
+                                          300000         // far
+                                        );
+thirdPersonCam.position.set(roomDimen/2,roomDimen/2,roomDimen/2);     
+thirdPersonCam.lookAt(new THREE.Vector3(0,0,0));
+
+// put crepuscular ray filter over camera
+function displayWaterFilter(texture){
+    var planeDimen = 7;
+    var plane = new THREE.Mesh(new THREE.PlaneGeometry(planeDimen, planeDimen, 32),
+                                new THREE.MeshBasicMaterial({
+                                    color: 0xffffff,
+                                    map: texture,
+                                    transparent: true,
+                                    opacity: 0.3
+                                }));
+    
+    thirdPersonCam.add(plane);
+    plane.position.z += -2;
+    scene.add(thirdPersonCam);
+    console.log("Water filter loaded");
+}
+
+// create a texture loader to load the image of the ocean scene
+
+var loader = new THREE.TextureLoader();
+            
+loader.load("assets/textures/camerafilter.jpg",
+            function (texture) {
+                displayWaterFilter(texture);
+            } );
+
+// Orbit controls (enables camera movement)
+thirdPersonControls = new THREE.OrbitControls(thirdPersonCam,canvasElt);
+thirdPersonControls.maxDistance = roomDimen/2*0.99; // restrict how far you can dolly out
+thirdPersonControls.update();
+
+var camera = thirdPersonCam;
+var controls = thirdPersonControls;
+
+
+// ====================================================================
+/* LIGHT SETUP */
+
+var ambLight = new THREE.AmbientLight(0x6cf5fc, 0.8); //color,intensity 6cf5fc
+scene.add(ambLight);
+
+var spotLight = new THREE.SpotLight 
+                     ( 0xf2ff96,      // rgb color of the source, default white f2ff96
+                       1.5,  // multiplication factor, default 1
+                       200,   // distance where light ends, default 0
+                       Math.PI/2,      // width of beam in radians, default Math.PI/2
+                       1,   // % spotlight cone attenuated (0-1), default 0
+                       2       // amount light decays with distance, default 1
+                      );
+spotLight.position.set(0,75,-50);
+// spotLight.castShadow = true;
+// spotLight.shadow.camera.near = camera.near;
+// spotLight.shadow.camera.far = camera.far;
+// spotLight.shadow.camera.fov = camera.fov;
+// spotLight.shadow.camera.right     =  50;
+// spotLight.shadow.camera.left     = -50;
+// spotLight.shadow.camera.top      =  50;
+// spotLight.shadow.camera.bottom   = -50;
+
+scene.add(spotLight);
+
+var target = new THREE.Object3D();
+target.position.set(0,-50, 0);
+spotLight.target = target;
+scene.add(spotLight.target);
+
+
+// ====================================================================
+/* ANIMATION SETUP */  
+
+var directionVec= new THREE.Vector3(0.0, 0.0, 0.0);
+var rotation = 0;
+var rotationStep = 0.1 
+
+function onKeyDown( event ) {
+    switch ( event.keyCode ) {
+
+        case 87: // w move forward
+            //up = true;
+            directionVec.setX(-Math.cos(rotation));
+            directionVec.setZ(Math.sin(rotation));
+            break;
+
+        case 65: // a turn left
+            rotation += rotationStep;
+            sub.rotation.y += rotationStep;
+            break;
+
+        case 83: // s move backward
+            directionVec.setX(Math.cos(rotation));
+            directionVec.setZ(-Math.sin(rotation));
+            break;
+
+        case 68: // d turn right
+            rotation -= rotationStep;
+            sub.rotation.y -= rotationStep;
+            break;
+            
+         case 73: // i move up
+            directionVec.setY(1);
+            break;
+            
+         case 75: // k move down
+            directionVec.setY(-1);
+            break;
+    }
+}
+    
+   
+//resets the direction vector to (0,0,0) so that sub does not move infinitely
+function onKeyUp( event ) {
+    switch ( event.keyCode ) {
+
+        case 87: // w
+            //up = true;
+            directionVec.setX(0);
+            directionVec.setZ(0);
+            break;
+
+        case 65: // a
+            directionVec.setX(0);
+            break;
+
+        case 83: // s
+            directionVec.setX(0);
+            directionVec.setZ(0);
+            break;
+
+        case 68: // d
+            directionVec.setX(0);
+            break;
+            
+        case 73: // i
+            directionVec.setY(0);
+            break;
+            
+         case 75: // k
+            directionVec.setY(0);
+            break;
+    }
+}
+
+function subMotion() {
+    // (if any)
+    if (directionVec.x !== 0 || directionVec.y !== 0 || directionVec.z !== 0) {
+        move();
+        return true;
+    }
+}
+
+//Calculate outer limits of sub's possible position based on its size
+var subLimitLong = roomDimen/2-(92*subScaleFactor/2)
+var subLimitWide = roomDimen/2-(40*subScaleFactor/2)
+
+function move() {
+    // We update our Object3D's position from our "direction"
+    var checkPosX = sub.position.x + directionVec.x * ((directionVec.y === 0) ? 2 : Math.sqrt(6));
+    var checkPosZ = sub.position.z + directionVec.z * ((directionVec.y === 0) ? 2 : Math.sqrt(6));
+    //if X and Z pos are within the boundaries, alter position, else do nothing
+    if ((checkPosX < subLimitLong) && (checkPosX > -subLimitLong)
+        && (checkPosZ < subLimitLong) && (checkPosZ > -subLimitLong)) {
+        sub.position.x += directionVec.x * ((directionVec.y === 0) ? 2 : Math.sqrt(6)); //allow for diagonal motion
+        sub.position.z += directionVec.z * ((directionVec.y === 0) ? 2 : Math.sqrt(6));
+    } 
+    
+    var checkPosY = sub.position.y + directionVec.y * ((directionVec.x === 0) ? 2 : Math.sqrt(6));
+    //if Y pos is within the boundaries, alter position, else do nothing
+    if ((checkPosY < subLimitWide) && (checkPosY > -subLimitWide)) {
+        sub.position.y += directionVec.y * ((directionVec.x === 0) ? 2 : Math.sqrt(6));
+    }
+}
+
+function mantaMotion(){
+    var mantaLimit = roomDimen/2 + 21*mantaScale + 5
+    for(var i=0; i<mantaRays.length; i++){
+        mantaRays[i].position.x -= mantaRays[i].speed;
+        //if manta ray leaves scene completely, have it loop back to re-enter the scene from the other side
+        if(mantaRays[i].position.x < -mantaLimit) mantaRays[i].position.x = mantaLimit;
+    }
+}
+
+// animates orbit control movement
+function animate() {
+	requestAnimationFrame(animate);
+	// required if controls.enableDamping or controls.autoRotate are set to true
+	controls.update();
+	subMotion();
+	mantaMotion();
+	renderer.render(scene, camera);
+}
+
+animate();
+        
+</script>
+
+</body>
+</html>

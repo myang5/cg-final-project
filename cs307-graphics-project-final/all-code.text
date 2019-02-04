@@ -1,0 +1,1079 @@
+---------------------------------------------------project.html---------------------------------------------------
+<!-- 
+Midori Yang and Soobin Yang
+CS307: Computer Graphics
+Final Project Alpha version
+ -->
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Lato|Ubuntu" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <title>Final Project: Ocean Scene</title>
+  </head>
+<body>
+    
+    <div id="header">
+        <div>
+            <h1>CS307 Final Project</h1>
+            <h3>by Midori and Soobin Yang</h3>
+            <p>For our final project, we decided to create an ocean scene based off of the objects we created for a previous assignment: a submarine and manta ray.<br>
+            <a href = "demo.html" target="_blank">You can view the demo here.</a></p>
+        </div>
+    </div>
+    
+    <h3>Submarine</h3>
+    <img src="assets/screenshots/sub1.PNG" alt="front-side view of submarine">
+    <img src="assets/screenshots/sub2.PNG" alt="back view of submarine">
+    <p>The submarine is made of several lathe, extrude, and basic torus geometries, with Lambert material for the submarine body 
+    and Phong materials for the reflective windows and metal elements. The user can alter its position in the scene using the WASD and IK keys.</p>
+    
+    <h3>Manta Ray</h3>
+    <img src="assets/screenshots/manta1.PNG" alt="front-top view of manta ray">
+    <img src="assets/screenshots/manta2.PNG" alt="back-top view of manta ray">
+    <p>The manta rays are made of a few reflected Bezier surfaces for the body and wings, a basic cone geometry for the tail, and Katherine Kjeer's TubeRadialGeometry for the lobes. Lambert material is used 
+    throughout since rays are not particularly shiny. The user can determine how many rays are generated to accomodate for different GPU capabalities. 
+    The rays' position and color are randomly generated throughout the scene given a number of rays and within certain aesthetic ranges. 
+    The HSL colors are restricted to generally be blue-green and the positions are generated so that no ray is placed too close to another.</p>
+    
+    <h3>Scene</h3>
+    <img src="assets/screenshots/scene.PNG" alt="scene with no objects"><br>
+    <figure>
+      <img src="assets/textures/surface_resized.jpg" alt="texture for ocean surface">
+      <figcaption>Texture used for ocean surface</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/textures/underwater_resized.jpg" alt="texture for walls of cube (underwater)">
+      <figcaption>Texture used for four walls (underwater scene)</figcaption>
+    </figure>
+    <figure>
+       <img src="assets/textures/oceansand_resized.jpg" alt="texture for sandy ocean floor">
+      <figcaption>Texture used for ocean floor</figcaption>
+    </figure>
+    <p>The background ocean scene is made using the skybox code from <a href="https://threejs.org/examples/webgl_water.html" target="_blank">the WebGL water demo</a>. 
+    It uses a custom shader to soften the shadows at the edges of the CubeGeometry to create an illusion of continuity. This would also require
+    textures that wrap seamlessly between the faces, but we did our best with the textures we found.</p>
+    
+    <h3>Lighting</h3>
+    <figure>
+      <img src="assets/screenshots/lighting1.PNG" alt="scene with default white lighting">
+      <figcaption>Scene with default white lighting</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/screenshots/lighting2.PNG" alt="scene with altered blue-green lighting">
+      <figcaption>Scene with altered blue-green lighting</figcaption>
+    </figure>
+    <figure>
+       <img src="assets/screenshots/lighting3.PNG" alt="scene with transparent crepuscular ray texture over camera">
+      <figcaption>Scene with transparent crepuscular ray texture over camera</figcaption>
+    </figure>
+    <p>To achieve an underwater effect, we used a blue-green ambientLight and a yellow spotLight shining from above the scene to mimic the sun. We also attached 
+    a semi-transparent water texture to the front of the camera to emphasize the effect of underwater crepuscular rays.</p>
+    
+    <h3>Camera</h3>
+    <p>We restricted the OrbitControls of the camera so that the user wouldn't be able to zoom out of the scene and break the illusion.</p>
+    
+    <h3>Animation</h3>
+    <p>The page listens for key presses from the WASD and IK keys to animate the submarine by changing the direction vector used to calculate its movement. 
+    The A and D keys rotate the submarine to the left and right respectively, and updates the X property based on sin(rotation) and the Z based on cos(rotation). 
+    The submarine is restricted from leaving the scene as the code checks its position.
+    <br>The manta rays are animated to swim forward, 
+    and loop back to the other when they reach a certain point outside of the scene. The rays have slightly different randomly-generated speeds to give some 
+    variety to how the scene looks.</p>
+    
+    <h3>Future Plans</h3>
+    <p>If we'd had more time, we would've liked to animate the manta rays' wings to flap realistically as they move through the "water." 
+    Doing this would involve calculating a function to animate the Bezier surfaces' control points, which would move roughly in the 
+    shape of a sine curve.<br>
+    It also would have been nice to create a more realistic-looking background that hid the fact that the scene was contained in a box, 
+    and add some decoration to the ocean floor.<br>
+    We also wanted to implement Three.js's animated water shader for the surface of the ocean, but instead used a static water texture 
+    due to time constraints.<br>
+    We were also thinking of adding a second camera view from the perspective of the submarine, as if the user was sitting in it.</p>
+  
+</body>
+</html>
+
+---------------------------------------------------style.css---------------------------------------------------
+body {
+    margin: 0;
+    padding: 0 0 5rem 0;
+    text-align: center;
+    font-family: 'Lato', sans-serif;
+}
+        
+h1 {
+    font-size: 3rem;
+    margin-top: 0; 
+    margin-bottom: 0.1rem;
+}
+
+h3 {
+    font-size: 1.7rem;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+#header {
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    width: 100%;
+    padding: 5rem 0;
+    background-size: 100%;
+    background-image: url("assets/screenshots/header.PNG");
+    background-color: #3667f9;
+    background-position: center;
+}
+
+#header div{
+    display: inline-block;
+    padding: 1.5rem;
+    background: rgba(3, 140, 177, 0.9);
+}
+
+#header a {
+    color: #fff;
+    opacity: 1.0;
+    transition: opacity 0.5s;
+    -webkit-transition: opacity 0.5s;
+    -moz-transition: opacity 0.5s;
+    -o-transition: opacity 0.5s;
+}
+
+#header a:hover {
+    opacity: 0.7;
+    transition: opacity 0.5s;
+    -webkit-transition: opacity 0.5s;
+    -moz-transition: opacity 0.5s;
+    -o-transition: opacity 0.5s;
+}
+
+p {
+    white-space: normal;
+    width: 950px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+figure {
+    display: inline-block;
+    margin: 0;
+}
+
+figcaption {
+    font-style: italic;
+}
+
+img {
+    width: 500px;
+    padding-bottom: 5px;
+}
+
+canvas {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 10px;
+      width: 1000;
+      height: 800;
+      background-color: #ffffff;
+  }
+
+---------------------------------------------------demo.html---------------------------------------------------
+<!-- 
+Midori Yang and Soobin Yang
+CS307: Computer Graphics
+Final Project Alpha version
+ -->
+<html>
+  <head>
+      
+    <link href="style.css" rel="stylesheet">
+    <script src="libs/three.js"></script>
+    <script src="libs/OrbitControls.js"></script>
+    <script src="libs/tw.js"></script>
+    <script src="libs/syang5Submarine.js"></script>
+    <script src="libs/myang5MantaRay.js"></script>
+    <script src="libs/TubeRadialGeometry.js"></script>
+    
+    <title>Final Project: Ocean Scene</title>
+    
+  </head>
+<body>
+    
+<p>
+    Click and drag to dolly the camera view, and use the arrow keys to move the camera.<br><br>
+    To move the submarine, use the WASD keys and IK keys:<br>
+    W, S - forward, backward<br>
+    A, D - rotate left, right<br>
+    I, K - up, down<br>
+</p>
+
+<script>
+
+// Number of manta rays displayed in the scene is user-determined
+// Set up scene after receiving this input
+var promptStr = "How many manta rays should fill the scene?\n(40 is recommended for aesthetics, 10 for slow computers)";
+var validStr = "Please enter a number.\n"
+var rays = prompt(promptStr);
+//If the input is not a valid number, ask again
+while(isNaN(parseInt(rays))){
+    rays = prompt(validStr + promptStr);
+}
+
+var scene = new THREE.Scene();
+var renderer = new THREE.WebGLRenderer();
+var canvasElt = renderer.domElement;
+document.addEventListener( 'keydown', onKeyDown, false );
+document.addEventListener( 'keyup', onKeyUp, false );
+document.body.appendChild(canvasElt);
+renderer.setSize(1000,800);
+renderer.setClearColor( 0xdddddd, 1);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+// We attempted to add shadows, but they don't seem to be appearing. All code related to shadows commented out.
+
+// ====================================================================
+/* ROOM SETUP */
+
+// made room size variable for future position referencing
+var roomDimen = 250;
+
+// code for skybox referenced from https://threejs.org/examples/webgl_water.html
+
+var cubeTextureLoader = new THREE.CubeTextureLoader();
+cubeTextureLoader.setPath('assets/textures/');
+
+var cubeTexture = cubeTextureLoader.load( [
+	'underwater_resized.jpg', 'underwater_resized.jpg',
+	'surface_resized.jpg', 'oceansand_resized.jpg',
+	'underwater_resized.jpg', 'underwater_resized.jpg'
+] );
+
+var cubeShader = THREE.ShaderLib[ 'cube' ];
+cubeShader.uniforms[ 'tCube' ].value = cubeTexture;
+
+var skyBoxMaterial = new THREE.ShaderMaterial( {
+	fragmentShader: cubeShader.fragmentShader,
+	vertexShader: cubeShader.vertexShader,
+	uniforms: cubeShader.uniforms,
+	side: THREE.BackSide
+} );
+
+var skyBox = new THREE.Mesh( new THREE.BoxBufferGeometry( roomDimen, roomDimen, roomDimen ), skyBoxMaterial );
+skyBox.receiveShadow = true;
+scene.add( skyBox );
+
+
+// ====================================================================
+/* OBJECT PROP SETUP */  
+
+// Add submarine to scene
+var sub = syang5Submarine();
+var subScaleFactor = 0.5
+sub.scale.set( subScaleFactor, subScaleFactor, subScaleFactor );
+// sub.castShadow = true;
+// sub.receiveShadow = true;
+scene.add(sub);
+
+// Add manta ray to scene
+
+function pickColor(){ // pick random HSL color within range of values (arbitrary)
+    var h = 250 - Math.floor(Math.random() * (70/10+1)) * 10; // range 180-250 interval of 10
+    var s = 88;
+    var l = 80 - Math.floor(Math.random() * (30/10+1)) * 10; // range 50 - 80 interval of 10
+    color = new THREE.Color("hsl(" + h + "," + s + "%," + l + "%" + ")");
+    return color;
+}
+
+var numRays = Math.floor(parseInt(rays));
+var mantaRays = []
+
+for(var i = 0;i<numRays;i++){
+    var mantaRay = myang5MantaRay(pickColor(),0xffffff);
+    var interval = 10;
+    var mantaScale = 1.3;
+    // pick random xyz position within constraints of the room size
+    // and also make sure they don't overlap by introducing spacing interval
+    var x = roomDimen*0.8/2 - Math.floor(Math.random() * (roomDimen*0.8/interval+1)) * interval;  
+    var y = roomDimen*0.8/2 - Math.floor(Math.random() * (roomDimen*0.8/interval+1)) * interval;  
+    var z = roomDimen*0.8/2 - Math.floor(Math.random() * (roomDimen*0.8/interval+1)) * interval; 
+    mantaRay.position.set(x, y, z);
+    mantaRay.scale.set(mantaScale, mantaScale, mantaScale);
+    // mantaRay.castShadow = true;
+    // mantaRay.receiveShadow = true;
+    mantaRay.speed = 1 + Math.floor(Math.random() * 11) * 0.1; //pick random speed between 1.0-2.0 units per frame interval of 0.1
+    scene.add(mantaRay);
+    mantaRays.push(mantaRay)
+}
+
+
+// ====================================================================
+/* CAMERA SETUP */
+
+var thirdPersonCam = new THREE.PerspectiveCamera( 90,      // fovy in degrees
+                                          1000/800,         // aspect ratio: our canvas is square
+                                          0.5,          // near
+                                          300000         // far
+                                        );
+thirdPersonCam.position.set(roomDimen/2,roomDimen/2,roomDimen/2);     
+thirdPersonCam.lookAt(new THREE.Vector3(0,0,0));
+
+// put crepuscular ray filter over camera
+function displayWaterFilter(texture){
+    var planeDimen = 7;
+    var plane = new THREE.Mesh(new THREE.PlaneGeometry(planeDimen, planeDimen, 32),
+                                new THREE.MeshBasicMaterial({
+                                    color: 0xffffff,
+                                    map: texture,
+                                    transparent: true,
+                                    opacity: 0.3
+                                }));
+    
+    thirdPersonCam.add(plane);
+    plane.position.z += -2;
+    scene.add(thirdPersonCam);
+    console.log("Water filter loaded");
+}
+
+// create a texture loader to load the image of the ocean scene
+
+var loader = new THREE.TextureLoader();
+            
+loader.load("assets/textures/camerafilter.jpg",
+            function (texture) {
+                displayWaterFilter(texture);
+            } );
+
+// Orbit controls (enables camera movement)
+thirdPersonControls = new THREE.OrbitControls(thirdPersonCam,canvasElt);
+thirdPersonControls.maxDistance = roomDimen/2*0.99; // restrict how far you can dolly out
+thirdPersonControls.update();
+
+var camera = thirdPersonCam;
+var controls = thirdPersonControls;
+
+
+// ====================================================================
+/* LIGHT SETUP */
+
+var ambLight = new THREE.AmbientLight(0x6cf5fc, 0.8); //color,intensity 6cf5fc
+scene.add(ambLight);
+
+var spotLight = new THREE.SpotLight 
+                     ( 0xf2ff96,      // rgb color of the source, default white f2ff96
+                       1.5,  // multiplication factor, default 1
+                       200,   // distance where light ends, default 0
+                       Math.PI/2,      // width of beam in radians, default Math.PI/2
+                       1,   // % spotlight cone attenuated (0-1), default 0
+                       2       // amount light decays with distance, default 1
+                      );
+spotLight.position.set(0,75,-50);
+// spotLight.castShadow = true;
+// spotLight.shadow.camera.near = camera.near;
+// spotLight.shadow.camera.far = camera.far;
+// spotLight.shadow.camera.fov = camera.fov;
+// spotLight.shadow.camera.right     =  50;
+// spotLight.shadow.camera.left     = -50;
+// spotLight.shadow.camera.top      =  50;
+// spotLight.shadow.camera.bottom   = -50;
+
+scene.add(spotLight);
+
+var target = new THREE.Object3D();
+target.position.set(0,-50, 0);
+spotLight.target = target;
+scene.add(spotLight.target);
+
+
+// ====================================================================
+/* ANIMATION SETUP */  
+
+var directionVec= new THREE.Vector3(0.0, 0.0, 0.0);
+var rotation = 0;
+var rotationStep = 0.1 
+
+function onKeyDown( event ) {
+    switch ( event.keyCode ) {
+
+        case 87: // w move forward
+            //up = true;
+            directionVec.setX(-Math.cos(rotation));
+            directionVec.setZ(Math.sin(rotation));
+            break;
+
+        case 65: // a turn left
+            rotation += rotationStep;
+            sub.rotation.y += rotationStep;
+            break;
+
+        case 83: // s move backward
+            directionVec.setX(Math.cos(rotation));
+            directionVec.setZ(-Math.sin(rotation));
+            break;
+
+        case 68: // d turn right
+            rotation -= rotationStep;
+            sub.rotation.y -= rotationStep;
+            break;
+            
+         case 73: // i move up
+            directionVec.setY(1);
+            break;
+            
+         case 75: // k move down
+            directionVec.setY(-1);
+            break;
+    }
+}
+    
+   
+//resets the direction vector to (0,0,0) so that sub does not move infinitely
+function onKeyUp( event ) {
+    switch ( event.keyCode ) {
+
+        case 87: // w
+            //up = true;
+            directionVec.setX(0);
+            directionVec.setZ(0);
+            break;
+
+        case 65: // a
+            directionVec.setX(0);
+            break;
+
+        case 83: // s
+            directionVec.setX(0);
+            directionVec.setZ(0);
+            break;
+
+        case 68: // d
+            directionVec.setX(0);
+            break;
+            
+        case 73: // i
+            directionVec.setY(0);
+            break;
+            
+         case 75: // k
+            directionVec.setY(0);
+            break;
+    }
+}
+
+function subMotion() {
+    // (if any)
+    if (directionVec.x !== 0 || directionVec.y !== 0 || directionVec.z !== 0) {
+        move();
+        return true;
+    }
+}
+
+//Calculate outer limits of sub's possible position based on its size
+var subLimitLong = roomDimen/2-(92*subScaleFactor/2)
+var subLimitWide = roomDimen/2-(40*subScaleFactor/2)
+
+function move() {
+    // We update our Object3D's position from our "direction"
+    var checkPosX = sub.position.x + directionVec.x * ((directionVec.y === 0) ? 2 : Math.sqrt(6));
+    var checkPosZ = sub.position.z + directionVec.z * ((directionVec.y === 0) ? 2 : Math.sqrt(6));
+    //if X and Z pos are within the boundaries, alter position, else do nothing
+    if ((checkPosX < subLimitLong) && (checkPosX > -subLimitLong)
+        && (checkPosZ < subLimitLong) && (checkPosZ > -subLimitLong)) {
+        sub.position.x += directionVec.x * ((directionVec.y === 0) ? 2 : Math.sqrt(6)); //allow for diagonal motion
+        sub.position.z += directionVec.z * ((directionVec.y === 0) ? 2 : Math.sqrt(6));
+    } 
+    
+    var checkPosY = sub.position.y + directionVec.y * ((directionVec.x === 0) ? 2 : Math.sqrt(6));
+    //if Y pos is within the boundaries, alter position, else do nothing
+    if ((checkPosY < subLimitWide) && (checkPosY > -subLimitWide)) {
+        sub.position.y += directionVec.y * ((directionVec.x === 0) ? 2 : Math.sqrt(6));
+    }
+}
+
+function mantaMotion(){
+    var mantaLimit = roomDimen/2 + 21*mantaScale + 5
+    for(var i=0; i<mantaRays.length; i++){
+        mantaRays[i].position.x -= mantaRays[i].speed;
+        //if manta ray leaves scene completely, have it loop back to re-enter the scene from the other side
+        if(mantaRays[i].position.x < -mantaLimit) mantaRays[i].position.x = mantaLimit;
+    }
+}
+
+// animates orbit control movement
+function animate() {
+	requestAnimationFrame(animate);
+	// required if controls.enableDamping or controls.autoRotate are set to true
+	controls.update();
+	subMotion();
+	mantaMotion();
+	renderer.render(scene, camera);
+}
+
+animate();
+        
+</script>
+
+</body>
+</html>
+
+---------------------------------------------------myang5MantaRay.js---------------------------------------------------
+/* Midori Yang
+11/18/2018
+CS 307
+
+MIT License
+
+Copyright (c) 2018 Midori Yang
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE. 
+*/
+
+var renderer = new THREE.WebGLRenderer();
+var scene = new THREE.Scene(); 
+TW.mainInit(renderer,scene);
+
+/* 
+This code creates a manta ray of fixed size and proportions:
+
+Main body: 11 units long, 6 units wide at mouth
+Lobes: ~2.5 units long
+Wings: 11 units long each
+Tail: 10 units long
+
+Total length: 23.5 units
+Total width: 28 units
+
+The whole object can be resized as necessary.
+The color of the top half of the body and bottom half are customizable.
+The origin of the manta ray is at the front-center i.e. in the middle of the lobes,
+and it is created parallel to the floor (XZ plane).
+The code requires TubeRadialGeometry to make the lobes.
+
+DISCLAIMER: This manta ray was modeled while referencing photos of giant manta rays and
+manta ray plushies for simplicity. It is not necessarily anatomically accurate.
+*/
+
+// FOR REFERENCE: BEZIER CURVE TOOL https://www.desmos.com/calculator/cahqdxeshd
+
+// ====================================================================
+/* CREATE MANTA RAY */
+
+   function showCP(cpList) {
+    for( var j=0; j < cpList.length; j++ ) {
+        var subList = cpList[j];                      
+        for( var i=0; i < subList.length; i++ ) {
+            scene.add(TW.createPoint(subList[i]));
+        }
+    }
+};
+
+// NOTE: origin of the manta ray is at the front-center i.e. in the middle of the lobes
+// and it is created parallel to the floor (XZ plane)
+
+function myang5MantaRay(topColor,bottomColor){ // function takes in params object
+    
+    this.topColor  =  topColor, // color of top surface
+    this.bottomColor =  bottomColor; // color of bottom surface (underside)
+    this.bodyLength = 11; // length of main body
+    this.bodyWidth = 10; // width of main body at widest point (manta's mouth)
+    this.tailLength = 10;
+    this.tailRadius =  0.3; //tail is ConeGeometry
+    this.speed;
+    
+    var manta = new THREE.Object3D();
+    var topMaterial = new THREE.MeshLambertMaterial({color: topColor, side: THREE.DoubleSide});
+    var bottomMaterial = new THREE.MeshLambertMaterial({color: bottomColor, side: THREE.DoubleSide})
+    
+    // making the body
+    
+    var body = new THREE.Object3D();
+    
+    var bodyTopCps = [ //results in body length of 11 units and width of 6
+    [ [0.5,0,-3],   [3.2,0,-3.2],    [7.5,0,-2.5],  [10,0,-1] ],
+    [ [-0.17,0,-2], [-0.17,3,-3.2],  [7,2,-2.5],    [11.34,0,-0.2] ],
+    [ [-0.17,0,2],  [-0.17,3,3.2],   [7,2,2.5],     [11.34,0,0.2] ],
+    [ [0.5,0,3],    [3.2,0,3.2],     [7.5,0,2.5],   [10,0,1] ]
+    ];    
+    
+    var bodyTop = new THREE.Mesh(new THREE.BezierSurfaceGeometry(bodyTopCps,20,20),topMaterial);
+    body.add(bodyTop);
+    
+    var bodyBottomCps = [ 
+    [ [0.5,0,-3],   [3.2,0,-3.2],     [7.5,0,-2.5],  [10,0,-1] ],
+    [ [-0.17,0,-2], [-0.17,-3,-3.2],  [7,-2,-2.5],   [11.34,0,-0.2] ],
+    [ [-0.17,0,2],  [-0.17,-3,3.2],   [7,-2,2.5],    [11.34,0,0.2] ],
+    [ [0.5,0,3],    [3.2,0,3.2],      [7.5,0,2.5],   [10,0,1] ]
+    ];    
+    
+    var bodyBottom = new THREE.Mesh(new THREE.BezierSurfaceGeometry(bodyBottomCps,20,20),bottomMaterial);
+    body.add(bodyBottom);
+    
+   
+    // body.scale.set(params.bodyLength/11,1,params.bodyWidth/6); !!! implement after fixing wings
+    manta.add(body);
+    
+    //showCP(bodyTopCps); 
+    //showCP(bodyBottomCps); 
+    
+    // making the fins
+    
+    var fin = new THREE.Object3D(); 
+    // !!! still need to make fins resize where it meets body
+    // !!! still need to make fins resize to user length
+    
+     var finTopCps = [ 
+    [ [6,0,10.5],  [6.5,0,10.8],  [7,0,11.1],     [7,0,10.5] ],
+    [ [2,0,8],     [2,0.5,8],     [6.2,0.5,6.3],  [6.2,0,6.3] ],
+    [ [1,0,4.4],   [1,0.5,4.4],   [8.3,0.5,3.4],  [8.3,0,3.4] ],
+    [ [0.5,0.2,2], [4,0.2,2.3],   [7,0.2,2],      [10.6,0.2,0] ] 
+    ]; 
+    var finTop = new THREE.Mesh(new THREE.BezierSurfaceGeometry(finTopCps,20,20),topMaterial);
+    fin.add(finTop);
+    
+     var finBottomCps = [ 
+    [ [6,0,10.5],   [6.5,0,10.8],    [7,0,11.1],       [7,0,10.5] ],
+    [ [2,0,8],      [2,-0.5,8],      [6.2,-0.5,6.3],   [6.2,0,6.3] ],
+    [ [1,0,4.4],    [1,-0.5,4.4],    [8.3,-0.5,3.4],   [8.3,0,3.4] ],
+    [ [0.5,-0.2,2], [4,-0.2,2.3],    [7,-0.2,2],       [10.6,-0.2,0] ] 
+    ]; 
+    var finBottom = new THREE.Mesh(new THREE.BezierSurfaceGeometry(finBottomCps,20,20),bottomMaterial);
+    fin.add(finBottom);
+    manta.add(fin);
+    
+    //showCP(finTopCps); 
+    //showCP(finBottomCps); 
+    
+    var fin2 = fin.clone();
+    fin2.rotation.x += Math.PI;
+    fin2.children[1].material = topMaterial;
+    fin2.children[0].material = bottomMaterial;
+    manta.add(fin2);
+    
+    //making the tail
+    
+    var insideBody = bodyLength*0.1; // tail goes partially into body to hide end of cone
+    
+    var tailCont = new THREE.Object3D();
+    var tail = new THREE.Mesh(new THREE.ConeGeometry(tailRadius,tailLength+insideBody,32),topMaterial);
+    tailCont.add(tail);
+    tailCont.rotation.z += -Math.PI/2;
+    tailCont.position.set(bodyLength+tailLength/2-insideBody/2,0,0);
+    manta.add(tailCont);
+    
+    // making the lobes
+    
+    var lobe = new THREE.Object3D();
+    // !!! still need to make lobes change position with body width
+    // !!! stil need to make lobes change with user length (and width?)
+    
+    var bezierCurve = new THREE.CubicBezierCurve3(
+       new THREE.Vector3(0.8,0,-2.5), // first point from bodyTop
+       new THREE.Vector3(-0.2,0,-3),
+       new THREE.Vector3(-1.2,0,-3.25),
+       new THREE.Vector3(-2.2,0,-3)
+    );
+    var radii = [0.5,0.7];
+    var lobeGeom = new THREE.TubeRadialGeometry(bezierCurve, 32, radii, 32, false);
+    var lobeMesh = new THREE.Mesh(lobeGeom,topMaterial);
+    lobe.add(lobeMesh);
+    manta.add(lobe);
+    
+    var lobe2 = lobe.clone();
+    lobe2.rotation.x = -Math.PI;
+    manta.add(lobe2);
+    
+    return manta;
+}
+
+
+// function that creates guides of for debugging purposes
+function drawGuides(guidesXmin,guidesXmax,guidesZmin, guidesZmax, height){
+    var geometryX = new THREE.Geometry();
+    geometryX.vertices.push(new THREE.Vector3(0,height,0));
+    geometryX.vertices.push(new THREE.Vector3(0,0,0));
+    
+    var geometryZ = new THREE.Geometry();
+    geometryZ.vertices.push(new THREE.Vector3(0,height,0));
+    geometryZ.vertices.push(new THREE.Vector3(0,0,0));
+    
+    var lineX = new THREE.Line(geometryX, 
+                              new THREE.LineBasicMaterial( {color: 0x0000ff }));
+    var lineZ = new THREE.Line(geometryZ, 
+                              new THREE.LineBasicMaterial( {color: 0x0000ff }));
+    
+    for(var i = guidesXmin;i<=guidesXmax; i++){
+        var guide = lineX.clone();
+        guide.position.x += i
+        scene.add(guide)
+    }
+    for(var i = guidesZmin;i<=guidesZmax; i++){
+        var guide = lineZ.clone();
+        guide.position.z += i
+        scene.add(guide)
+    }
+}
+
+---------------------------------------------------syang5Submarine.js---------------------------------------------------
+/*  
+syang5Submarine.js
+Soo Bin Yang
+Hwk6 CS 307
+Fall 2018
+
+Creates a submarine using lathes and splines, along with 
+spheres and cylinders. The sub is approximately 
+92 units long (including submarine body and propeller) and
+is approximately 35 units wide at the widest point. 
+Material of submarine uses Phong and Lambert materials. 
+The origin sits at the center of the submarine.  
+
+MIT License
+
+Copyright (c) 2016 Soo Bin Yang
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE. 
+*/
+
+function syang5Submarine() {
+
+  var subMat = new THREE.MeshLambertMaterial({ color: 0xffff00,
+                                               side: THREE.BackSide,
+                                               shadowSide: THREE.DoubleSide});
+
+  var windowMat = new THREE.MeshPhongMaterial({ color: 0xB1D9F4,
+                                                side: THREE.DoubleSide,
+                                                specular: 0x000000,
+                                                shininess: 50,
+                                                shadowSide: THREE.DoubleSide});
+                                                
+  var decoMat = new THREE.MeshPhongMaterial({ color: 0xcccc00,
+                                                side: THREE.DoubleSide,
+                                                specular: 0x000000,
+                                                shininess: 20,
+                                                shadowSide: THREE.DoubleSide});
+                                                
+  var metalMat = new THREE.MeshPhongMaterial({ color: 0xb2b2b2,
+                                                side: THREE.DoubleSide,
+                                                specular: 0x000000,
+                                                shininess: 50,
+                                                shadowSide: THREE.DoubleSide});
+  
+  var submarine = new THREE.Object3D();
+  var body = createBody();
+  submarine.add(body);
+  
+  var subTower = createTower();
+  subTower.position.set( 0, 17.5, 0 );
+  submarine.add(subTower);
+  
+  var propeller = createPropeller();
+  propeller.position.set( 50, 0, 0 );
+  submarine.add(propeller);
+  
+  addRudder(submarine);
+  
+  function createBody() {
+    var body = new THREE.Object3D();
+    var bodyMain = createBodyMain();
+    bodyMain.position.set( 50, 0, 0 );
+    bodyMain.rotation.z = TW.degrees2radians(90);
+    body.add(bodyMain);
+    
+    var bodyFront = createWindow(34/2);
+    bodyFront.position.set( -30, 0, 0 );
+    body.add(bodyFront);
+    
+    addBodyFrames(body);
+    addWindows(body);
+    
+    return body;
+  } 
+  
+  function createBodyMain() {
+    var upper_cp = [ [34/2, 81],
+                     [35/2, 76],
+                     [35/2, 65],
+                     [35/2, 54] ];
+
+    var middle_cp = [ [35/2,  54],
+                  [35/2,  45],
+                  [33/2, 36],
+                  [29/2, 27] ];
+                          
+    var lower_cp = [ [29/2, 27],
+                 [25/2, 18],
+                 [21/2,  9],
+                 [0,  0.0] ];
+    
+    var bodyPts = Array.prototype.concat(upper_cp, middle_cp, lower_cp);
+    
+    // returns an array of Vector3 objects made from the input 2D points
+    var bodyPoints = makePoints(bodyPts);
+    
+    // create a spline curve to use for the lathe geometry
+    var splineObj = makeSplineObj(bodyPoints);
+    
+    var geom = new THREE.LatheGeometry(splineObj.geometry.vertices, 30);
+    bodyObj = new THREE.Mesh(geom, subMat);
+    return bodyObj;
+  }
+  
+  function createWindow(radius) {
+    var windowGeom = new THREE.SphereGeometry(radius, 30, 30);
+    var windowMesh = new THREE.Mesh(windowGeom, windowMat);
+    return windowMesh;
+  }
+  
+  function addWindows(sub){
+    var window1 = createWindow(15/2);
+    window1.position.set( -20, 0, 15 );
+    sub.add(window1);
+    
+    var window2 = createWindow(15/2);
+    window2.position.set( 0, 0, 15 );
+    sub.add(window2);
+    
+    var window3 = createWindow(15/2);
+    window3.position.set( 20, 0, 12.5 );
+    sub.add(window3);
+    
+    var window4 = createWindow(15/2);
+    window4.position.set( -20, 0, -15 );
+    sub.add(window4);
+    
+    var window5 = createWindow(15/2);
+    window5.position.set( 0, 0, -15 );
+    sub.add(window5);
+    
+    var window6 = createWindow(15/2);
+    window6.position.set( 20, 0, -12.5 );
+    sub.add(window6);
+    
+    return sub;
+  }
+  
+  function createSubFrame(radius) {
+    var frameGeom = new THREE.TorusGeometry(radius, 0.75, 3, 100);
+    var frameMesh = new THREE.Mesh(frameGeom, decoMat);
+    frameMesh.rotation.y = TW.degrees2radians(90);
+
+    return frameMesh;
+  }
+  
+  function addBodyFrames(sub){
+    var frame1 = createSubFrame(34/2);
+    frame1.position.set(-30.5, 0, 0);
+    sub.add(frame1);
+    
+    var frame2 = createSubFrame(35/2);
+    frame2.position.set(-10, 0, 0);
+    sub.add(frame2);
+    
+    var frame3 = createSubFrame(34/2);
+    frame3.position.set(10, 0, 0);
+    sub.add(frame3);
+    
+    var frame4 = createSubFrame(26/2);
+    frame4.position.set(30, 0, 0);
+    sub.add(frame4);
+    
+    return sub;
+  }
+  
+  function createPeriscope() {
+    var scope = new THREE.Object3D();
+    
+    var tubeGeom = new THREE.CylinderGeometry( 1, 1, 10, 50 );
+    var tubeMesh = new THREE.Mesh(tubeGeom, decoMat);
+    tubeMesh.position.set( 0, 10, 0 );
+    scope.add(tubeMesh)
+    
+    var jointGeom = new THREE.TorusGeometry(2, 1, 30, 100, Math.PI/2);
+    var jointMesh = new THREE.Mesh(jointGeom, decoMat);
+    jointMesh.position.set( -2, 15, 0 );
+    scope.add(jointMesh)
+    
+    var scopeGeom = new THREE.SphereGeometry(1, 30, 30);
+    var scopeMesh = new THREE.Mesh(scopeGeom, windowMat);
+    scopeMesh.position.set( -2.25, 17, 0 );
+    scope.add(scopeMesh)
+    
+    return scope;
+  }
+  
+  function createTower() {
+    var tower = new THREE.Object3D();
+    
+    var towerGeom = new THREE.CylinderGeometry( 7.5, 12, 10, 50 );
+    var towerMesh = new THREE.Mesh(towerGeom, decoMat);
+    tower.add(towerMesh);
+    
+    var periscope = createPeriscope();
+    periscope.rotation.y = TW.degrees2radians(180);
+    tower.add(periscope);
+    
+    return tower;
+  }
+  
+  function createPropeller() {
+    var propeller = new THREE.Object3D();
+    
+    var baseGeom = new THREE.CylinderGeometry( 1, 1, 10, 50 );
+    var baseMesh = new THREE.Mesh(baseGeom, decoMat);
+    baseMesh.rotation.x = TW.degrees2radians(90);
+    baseMesh.rotation.z = TW.degrees2radians(90);
+    propeller.add(baseMesh);
+    
+    var headGeom = new THREE.CylinderGeometry( 2, 2, 2, 50 );
+    var headMesh = new THREE.Mesh(headGeom, metalMat);
+    headMesh.rotation.z = TW.degrees2radians(90);
+    headMesh.position.set( 4, 0, 0 );
+    propeller.add(headMesh);
+    
+    var blade1 = createPropellerBlade();
+    blade1.position.set( 3.5, -5, 6.5 );
+    blade1.rotation.y = TW.degrees2radians(90);
+    blade1.rotation.z = TW.degrees2radians(45);
+    propeller.add(blade1);
+    
+    var blade2 = createPropellerBlade();
+    blade2.position.set( 3.5, 5.5, 5);
+    blade2.rotation.y = TW.degrees2radians(90);
+    blade2.rotation.z = TW.degrees2radians(-45);
+    propeller.add(blade2);
+    
+    var blade3 = createPropellerBlade();
+    blade3.position.set( 3.5, 0, -8);
+    blade3.rotation.y = TW.degrees2radians(90);
+    blade3.rotation.z = TW.degrees2radians(180);
+    propeller.add(blade3);
+    
+    return propeller;
+  }
+
+  function createPropellerBlade() {
+    // create a basic shape
+    var shape = new THREE.Shape();
+    shape.moveTo( 8,0 );
+
+    shape.splineThru([new THREE.Vector2(4, 10),
+                      new THREE.Vector2(8, 15),
+                      new THREE.Vector2(12, 10),
+                      new THREE.Vector2(8, 0)])
+    
+    var extrudeSettings = {
+    	amount: 1,
+    	steps: 2,
+    	depth: 1,
+    	bevelEnabled: false,
+    	bevelThickness: 1,
+    	bevelSize: 0,
+    	bevelSegments: 1
+    };
+    
+    var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+    var mesh = new THREE.Mesh( geometry, metalMat ) ;
+    return mesh
+    
+  }
+  
+  function createRudder() {
+    var shape = new THREE.Shape();
+    shape.moveTo( 0,0 );
+    shape.lineTo( 2, 12 );
+    shape.lineTo( 8, 14 );
+    shape.lineTo( 8, 0 );
+    shape.lineTo( 0, 0 );
+    
+    var extrudeSettings = {
+    	amount: 1,
+    	steps: 2,
+    	depth: 1,
+    	bevelEnabled: false,
+    	bevelThickness: 1,
+    	bevelSize: 0,
+    	bevelSegments: 1
+    };
+    
+    var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+    var mesh = new THREE.Mesh( geometry, decoMat ) ;
+    return mesh
+  }
+  
+  function addRudder(sub) {
+    var ruddertop = createRudder();
+    ruddertop.position.set( 40, 5, 0 );
+    ruddertop.rotation.z = TW.degrees2radians(-45);
+    sub.add(ruddertop);
+    
+    var rudderbot = createRudder();
+    rudderbot.position.set( 47, -1, 0 );
+    rudderbot.rotation.z = TW.degrees2radians(225);
+    sub.add(rudderbot);
+    
+    return sub;
+  }
+
+  return submarine;
+  
+  //Helper Functions
+  
+  function makePoints (pts) {
+       var points = [];
+       for(var i = 0; i < pts.length; i++) {
+           points.push(new THREE.Vector3(pts[i][0], pts[i][1], 0));
+       }
+       return points;
+  }
+  
+  function makeSplineObj (points) {
+       var mat = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+       // var curve = new THREE.SplineCurve3(points);
+       var curve1 = new THREE.CubicBezierCurve3(points[0],points[1],points[2],points[3]);
+       var curve2 = new THREE.CubicBezierCurve3(points[4],points[5],points[6],points[7]);
+       var curve3 = new THREE.CubicBezierCurve3(points[8],points[9],points[10],points[11]);
+       var geom = new THREE.Geometry();
+       // geom.vertices = curve.getPoints(50);
+       geom.vertices = Array.prototype.concat( curve1.getPoints(10),
+                                               curve2.getPoints(10),
+                                               curve3.getPoints(10) );
+       splineObj = new THREE.Line( geom, new THREE.LineBasicMaterial( { linewidth: 3, color: 0x0000ff }) );
+      splineObj.translateX(0.1);
+      return splineObj;
+  }
+  
+}
+
